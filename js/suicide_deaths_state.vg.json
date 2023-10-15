@@ -1,0 +1,81 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "The Ranking of Number of Suicide between Different States in Australia",
+  "width": 600, "height": 400,
+  "data": {"url": "https://raw.githubusercontent.com/Yumei02/FIT3179_Assignment2/main/suicide_deaths_dataset1.json"},
+  "params": [
+    { "name": "Top_N", "value": 5,
+			"bind": {"input": "range", "min": 1, "max": 8, "step": 1 , "name": "Top N"}
+		}
+    ],
+    "transform": [{
+      "sort": [
+        {"field": "NumberofSuicideDeath", "order": "descending"}
+      ],
+      "window": [{
+        "op": "rank",
+        "as": "rank"
+      }],
+      "groupby": ["Year"]
+      },
+        { "filter": "datum.rank <= Top_N" }
+      ],
+  
+      "encoding": {
+        "x": {  "field": "Year",
+              "type": "ordinal" ,
+              "sort": ["2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021"] ,
+              "axis": { "labelAngle": 0 , "labelFontSize": 12 , "titleFontSize": 14},
+              "title": "Year"
+              } ,
+        "y": {  "field": "rank",
+                "type": "quantitative",
+                "sort": "descending",
+                "scale": {"domain": [0.5, {"expr": "Top_N+0.5"} ]},
+                "axis": { "labelAngle": 0 , "labelFontSize": 12 ,
+                          "tickMinStep": 1 ,
+                          "tickCount": {"expr": "Top_N"},
+                          "titleFontSize": 14 },
+                "title":  "State's ranking"
+              }
+        } ,
+  
+    "layer": [ 
+       {
+      "mark": {"type": "line", "interpolate": "monotone" },
+      "encoding": {
+        "color": { "field": "State" ,"scale":{
+          "domain": ["Australian Capital Territory", "New South Wales", "Northern Territory", "Queensland", "South Australia", "Tasmania", "Victoria", "Western Australia"],
+          "range": ["#1767ad", "#f79539", "#f5314b", "#57bfd9", "#0ec953", "#f5f533", "#b11cd6", "#ff91cf"]}
+      } ,
+        "size":{
+            "condition":  {"param": "sel_brand_leg", "empty": false, "value": 3},
+            "value": 1
+          }
+      }
+    },
+    {
+      "params": [
+        { "name": "sel_brand_leg", "select": {"type": "point" ,  "on": "click",  "fields": ["State"]},
+          "bind": "legend"
+        }
+      ],
+      "mark": {"type" :"tick", "thickness": 8 },
+      "encoding": {
+        "color": {
+            "condition":  {"param": "sel_brand_leg", "empty": false, "value": "black"} ,
+            "field": "State",
+            "scale":{
+            "domain": ["Australian Capital Territory", "New South Wales", "Northern Territory", "Queensland", "South Australia", "Tasmania", "Victoria", "Western Australia"],
+            "range": ["#1767ad", "#f79539", "#f5314b", "#57bfd9", "#0ec953", "#f5f533", "#b11cd6", "#ff91cf"]}
+        },"tooltip": [
+          
+          {"field": "State", "type": "nominal", "title": "State"},
+          {"field": "NumberofSuicideDeath", "type": "quantitative", "title": "Number of Suicide Deaths"}
+        ]
+      }
+  
+    }
+  ]
+  
+    } 

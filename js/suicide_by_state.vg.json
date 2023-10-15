@@ -1,0 +1,142 @@
+{
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "title": "The Suicide of Death in Australia",
+    "width":1300,
+    "height": 500,
+    "data": {
+      "name": "aus_state",
+      "url": "https://raw.githubusercontent.com/Yumei02/FIT3179_Assignment2/main/js/STE_2016_AUST.topojson",
+      "format": {"type": "topojson", "feature": "unnamed"}
+    },
+    "projection": {"type": "equalEarth"
+  },                  
+    "params": [
+        {
+          "name": "Year_selection",
+          "value": 2012,
+          "bind": {
+            "input": "range",
+            "min": 2012,
+            "max": 2021,
+            "step": 1,
+            "name": "Year:  "
+          }
+        }
+      ],
+    "layer": [
+      {
+        "transform": [
+          {
+            "calculate": "'Data is not available in ' + datum.properties.STE_NAME16",
+            "as": "note"
+          }
+        ],
+        "mark": {"type": "geoshape", "fill": "lightgray", "stroke": "white"},
+        "encoding": {"tooltip": {"field": "note"}}
+      },
+      
+      {
+        "data":{"url": "https://raw.githubusercontent.com/Yumei02/FIT3179_Assignment2/main/suicide_deaths_dataset.csv"},
+        "transform": [
+          {
+            "lookup": "State",
+            "from": {
+              "data": {
+                "url": "https://raw.githubusercontent.com/Yumei02/FIT3179_Assignment2/main/js/STE_2016_AUST.topojson",
+                "format": {"type": "topojson", "feature": "unnamed"}
+              },
+              "key": "properties.STE_NAME16",
+              "fields": ["properties","geometry", "type"]
+            }
+          },
+          {"filter": "datum.Year==Year_selection"},
+          {
+            "calculate": "datum.NumberofSuicideDeath/30315*100",
+            "as": "Rate"
+          }
+        ],
+        
+        "mark": {"type": "geoshape", "stroke": "white"},
+        "encoding": {
+          "color": {
+            "field": "Rate",
+            "type": "quantitative",
+            "scale": {
+              "type": "threshold",
+              "domain": [1, 2, 3, 4],
+              "range": ["#f7cb5c", "#f78c45", "#e03d24", "#ab070a", "#690507"]
+            }
+          },
+          
+          "tooltip": [
+            {"field": "properties.STE_NAME16", "type": "nominal", "title": "State"},
+            {"field": "NumberofSuicideDeath", "type": "quantitative", "title":"Number of Suicide Death"},
+            {
+              "field": "Rate",
+              "type": "quantitative",
+              "title":"Suicide Rate",
+              "format": ".2f"
+            }
+          ]
+        }
+      },
+      {
+        "data":{"url": "https://raw.githubusercontent.com/Yumei02/FIT3179_Assignment2/main/suicide_deaths_dataset.csv"},
+        "transform": [
+          {
+            "lookup": "State",
+            "from": {
+              "data": {
+                "url": "https://raw.githubusercontent.com/Yumei02/FIT3179_Assignment2/main/js/STE_2016_AUST.topojson",
+                "format": {"type": "topojson", "feature": "unnamed"}
+              },
+              "key": "properties.STE_NAME16",
+              "fields": ["properties","geometry", "type"]
+            }
+          },
+          {"filter": "datum.Year==Year_selection"},
+          {
+            "calculate": "datum.NumberofSuicideDeath/30315*100",
+            "as": "Rate"
+          },
+          
+          {
+            "calculate": "datum.latitude-0.7",
+            "as": "position"
+          }
+        ],
+        
+        "mark":{"type": "text", "fontWeight":"bolder"},
+        
+        "encoding": {"longitude":{"field":"longitude", "type": "quantitative"},
+                     "latitude":{"field":"position", "type": "quantitative"},
+                    "text":{"field":"Rate", "type": "quantitative", "format":".3f"}
+        }
+      },
+      
+      {
+        "transform": [{
+            "lookup": "properties.STE_NAME16",
+            "from":{
+                "data":{"url": "https://raw.githubusercontent.com/Yumei02/FIT3179_Assignment2/main/suicide_deaths_dataset.csv"},
+                "key": "State",
+                "fields": ["latitude", "longitude"]
+            }
+        },
+    { "filter": {
+        "field": "properties.STE_NAME16",
+        "oneOf": ["Australian Capital Territory", "New South Wales","Northern Territory", "Queensland", "South Australia", "Tasmania", "Victoria", "Western Australia"]
+      }}],
+        "mark":{"type": "text", "dy":-4, "dx":5, "fontWeight":"bolder"},
+        "encoding": {"longitude":{"field":"longitude", "type": "quantitative"},
+                     "latitude":{"field":"latitude", "type": "quantitative"},
+                    "text":{"field":"properties.STE_NAME16", "type": "nominal"}
+        }
+      }
+    ],
+    "config": {
+      "view": {
+         "stroke":"transparent"
+      }
+    }
+  }
